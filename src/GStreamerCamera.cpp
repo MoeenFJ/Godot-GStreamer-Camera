@@ -29,10 +29,7 @@ GStreamerCamera::~GStreamerCamera()
     stop_stream();
 }
 
-void GStreamerCamera::_process(double delta)
-{
-    return;
-}
+
 
 void GStreamerCamera::initialize(int width, int height, const String &device_name, const String &pipeline_string)
 {
@@ -45,7 +42,7 @@ void GStreamerCamera::initialize(int width, int height, const String &device_nam
     this->frame_width = width;
     this->frame_height = height;
     this->device_name = device_name;
-    this->device_path = vformat("/tmp/%s", device_name);
+    this->device_path = vformat("./%s", device_name);
     this->pipeline_string = pipeline_string;
     this->pts = 0;
 

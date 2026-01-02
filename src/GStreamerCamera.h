@@ -2,7 +2,7 @@
 #define GSTREAMER_CAMERA_H
 
 // --- Godot GDExtension Includes ---
-#include <godot_cpp/classes/sprite2d.hpp>
+#include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/string.hpp>
 
@@ -12,8 +12,8 @@
 
 using namespace godot;
 
-class GStreamerCamera : public Sprite2D {
-    GDCLASS(GStreamerCamera, Sprite2D)
+class GStreamerCamera : public Node {
+    GDCLASS(GStreamerCamera, Node)
 
 private:
     // --- Configurable Variables (Set by initialize()) ---
@@ -38,7 +38,6 @@ public:
     GStreamerCamera();
     ~GStreamerCamera();
 
-    void _process(double delta);
 
     void initialize(int width, int height, const String& device_name, const String& pipeline_string);
 

@@ -19,7 +19,7 @@ env.ParseConfig('pkg-config gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0 
 
 
 library = env.SharedLibrary(
-    "bin/libgdexample{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+    f"bin/libGStreamerCamera.x86_64{env["SHLIBSUFFIX"]}",
     source=sources,
 )
 
