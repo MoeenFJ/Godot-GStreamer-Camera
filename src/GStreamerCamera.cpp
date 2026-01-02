@@ -21,12 +21,12 @@ void GStreamerCamera::_bind_methods()
 
     ClassDB::bind_method(D_METHOD("get_camera_name"), &GStreamerCamera::get_device_name);
 	ClassDB::bind_method(D_METHOD("set_camera_name", "cameraName"), &GStreamerCamera::set_device_name);
-    ADD_PROPERTY(PropertyInfo(Variant::STRING, "deviceName", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR),"set_camera_name","get_camera_name");
+    ADD_PROPERTY(PropertyInfo(Variant::STRING, "deviceName", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT),"set_camera_name","get_camera_name");
 
 
     ClassDB::bind_method(D_METHOD("get_frame_size"), &GStreamerCamera::get_frame_size);
 	ClassDB::bind_method(D_METHOD("set_frame_size", "size"), &GStreamerCamera::set_frame_size);
-    ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "frameSize", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR),"set_frame_size","get_frame_size");
+    ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "frameSize", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT),"set_frame_size","get_frame_size");
 
 }
 
@@ -34,7 +34,6 @@ void GStreamerCamera::set_device_name(const String cameraName)
 {
     this->deviceName = cameraName;
     this->devicePath = vformat("./%s", this->deviceName);
-    UtilityFunctions::print(vformat("Name set to : %s", this->devicePath));
 
 } 
 String GStreamerCamera::get_device_name() const
@@ -45,6 +44,7 @@ String GStreamerCamera::get_device_name() const
 void GStreamerCamera::set_frame_size(const Vector2i size)
 {
     this->frameSize = size;
+    this->viewport->set_size(this->frameSize);
 } 
 Vector2i GStreamerCamera::get_frame_size() const
 {
@@ -59,7 +59,6 @@ GStreamerCamera::GStreamerCamera()
 
     this->viewport = memnew(SubViewport);
     this->viewport->add_child(this->camera);
-    this->viewport->set_size(this->frameSize);
     this->viewport->set_update_mode(SubViewport::UPDATE_ALWAYS);
     this->viewport->set_clear_mode(SubViewport::CLEAR_MODE_ALWAYS);
 
@@ -67,7 +66,7 @@ GStreamerCamera::GStreamerCamera()
     
     this->pts = 0;
 
-    this->initializeGStreamer();
+
 
 }
 
@@ -78,6 +77,11 @@ GStreamerCamera::~GStreamerCamera()
 
 void GStreamerCamera::_process(double delta) {
     this->send_frame(this->viewport->get_texture().ptr()->get_image().ptr()->get_data());
+}
+
+void GStreamerCamera::_ready()
+{
+    this->initializeGStreamer();
 }
 
 void GStreamerCamera::initializeGStreamer()

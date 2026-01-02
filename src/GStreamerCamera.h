@@ -57,6 +57,8 @@ public:
     Vector2i get_frame_size() const;
     
     void _process(double delta) override;
+    void _ready() override;
+
     bool is_streaming_active() const { return is_streaming; }
 };
 
