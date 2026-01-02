@@ -3,6 +3,7 @@
 
 // --- Godot GDExtension Includes ---
 #include <godot_cpp/classes/node3d.hpp>
+#include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/variant/packed_byte_array.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/classes/sub_viewport.hpp>
@@ -21,6 +22,7 @@ private:
     Vector2i frameSize = Vector2i(256,256);
     String deviceName = "VirtualCamera"; 
     String devicePath = "./VirtualCamera";
+
     String pipelineString = "";
 
     // --- GStreamer Elements ---
@@ -30,6 +32,7 @@ private:
     // --- State and Timing ---
     guint64 pts = 0; // Presentation Timestamp counter
     bool is_streaming = false;
+    Image::Format imageFormat = Image::Format::FORMAT_RGB8;
 
     SubViewport* viewport;
     Camera3D* camera;
@@ -37,7 +40,7 @@ private:
 
     void initializeGStreamer();
 
-    void send_frame(const PackedByteArray& pixel_data);
+    void send_frame();
     
     void stop_stream();
 
@@ -55,6 +58,9 @@ public:
 
     void set_frame_size(const Vector2i size);
     Vector2i get_frame_size() const;
+
+    void set_pipeline_string(const String pipelineString);
+    String get_pipeline_string() const;
     
     void _process(double delta) override;
     void _ready() override;
