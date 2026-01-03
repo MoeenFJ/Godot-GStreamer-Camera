@@ -6,7 +6,7 @@ This project is made as a part of a [autonomous vehicle simulator](https://githu
 Disclaimer : A portion of this addon is made using AI.
 
 ## How to use
-1. Add the bin folder and the GStreamerCamera.gdextension file to your project. make sure the paths in GStreamerCamera.gdextension match your project directory structure. The default is : "res://GStreamerCamera/bin".
+1. Add the bin folder and the GStreamerCamera.gdextension file to your project. make sure the paths in GStreamerCamera.gdextension match your project directory structure. The default is : "res://addons/Godot-GStreamer-Camera/bin".
 2. Restart the editor.
 3. Now a new node called "GStreamerCamera" should have been added.
 4. After adding one to the scene, you can configure it in the editor.
