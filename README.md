@@ -1,7 +1,7 @@
 # Godot-GStreamer-Camera
 Ever wanted to have a virtual camera in Godot which can output through gstreamer? then you can use this!
 
-This project is made as a part of a autonomous vehicle simulator intended to be used for training 1/10th scale autonomous vehicles.
+This project is made as a part of a [autonomous vehicle simulator](https://github.com/MoeenFJ/AVS) intended to be used for training 1/10th scale autonomous vehicles.
 
 Disclaimer : A portion of this addon is made using AI.
 
