@@ -3,6 +3,7 @@
 #include <godot_cpp/classes/viewport_texture.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/variant/callable.hpp>
 #include <string.h> // For memcpy
 #include <fstream>
 #include <sstream>
@@ -18,33 +19,19 @@ void GStreamerCamera::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("is_streaming_active"), &GStreamerCamera::is_streaming_active);
 
-    ClassDB::bind_method(D_METHOD("get_camera_name"), &GStreamerCamera::get_device_name);
-    ClassDB::bind_method(D_METHOD("set_camera_name", "cameraName"), &GStreamerCamera::set_device_name);
-    ADD_PROPERTY(PropertyInfo(Variant::STRING, "deviceName", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT), "set_camera_name", "get_camera_name");
+    ClassDB::bind_method(D_METHOD("get_device_path"), &GStreamerCamera::get_device_path);
+    ClassDB::bind_method(D_METHOD("set_device_path", "devicePath"), &GStreamerCamera::set_device_path);
+    ADD_PROPERTY(PropertyInfo(Variant::STRING, "devicePath", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT), "set_device_path", "get_device_path");
 
     ClassDB::bind_method(D_METHOD("get_frame_size"), &GStreamerCamera::get_frame_size);
     ClassDB::bind_method(D_METHOD("set_frame_size", "size"), &GStreamerCamera::set_frame_size);
     ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "frameSize", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT), "set_frame_size", "get_frame_size");
 
-    ClassDB::bind_method(D_METHOD("get_fov"), &GStreamerCamera::get_fov);
-    ClassDB::bind_method(D_METHOD("set_fov", "fov"), &GStreamerCamera::set_fov);
-    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "FOV", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT), "set_fov", "get_fov");
-
     ClassDB::bind_method(D_METHOD("get_pipeline_string"), &GStreamerCamera::get_pipeline_string);
     ClassDB::bind_method(D_METHOD("set_pipeline_string", "pipelineString"), &GStreamerCamera::set_pipeline_string);
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "GStreamer Pipeline String", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT), "set_pipeline_string", "get_pipeline_string");
-
-
 }
 
-void GStreamerCamera::set_fov(const float fov)
-{
-    this->camera->set_fov(fov);
-}
-float GStreamerCamera::get_fov() const
-{
-    return this->camera->get_fov();
-}
 
 void GStreamerCamera::set_pipeline_string(const String pipelineString)
 {
@@ -55,14 +42,14 @@ String GStreamerCamera::get_pipeline_string() const
     return this->pipelineString;
 }
 
-void GStreamerCamera::set_device_name(const String cameraName)
+
+void GStreamerCamera::set_device_path(const String devicePath)
 {
-    this->deviceName = cameraName;
-    this->devicePath = vformat("./%s", this->deviceName);
+    this->devicePath = devicePath;
 }
-String GStreamerCamera::get_device_name() const
+String GStreamerCamera::get_device_path() const
 {
-    return this->deviceName;
+    return this->devicePath;
 }
 
 void GStreamerCamera::set_frame_size(const Vector2i size)
@@ -78,16 +65,14 @@ Vector2i GStreamerCamera::get_frame_size() const
 GStreamerCamera::GStreamerCamera()
 {
 
-    this->camera = memnew(Camera3D);
-    //this->camera->set_fov(90);
+    this-> transformNode = memnew(Node3D);
+    this->transformNode->set_name("GStreamerCameraTransformNode");
 
     this->viewport = memnew(SubViewport);
-    this->viewport->add_child(this->camera);
     this->viewport->set_size(this->frameSize);
+    this->viewport->set_name("GStreamerCameraViewport");
     this->viewport->set_update_mode(SubViewport::UPDATE_ALWAYS);
     this->viewport->set_clear_mode(SubViewport::CLEAR_MODE_ALWAYS);
-
-    this->add_child(this->viewport);
 
     this->pts = 0;
 }
@@ -97,24 +82,30 @@ GStreamerCamera::~GStreamerCamera()
     stop_stream();
 }
 
+bool doneonce = false;
 void GStreamerCamera::_process(double delta)
 {
-    // Fix this later
-    this->camera->set_global_transform(this->get_global_transform());
-    
-
+    if (!doneonce)
+    {
+        this->add_sibling(this->transformNode);
+        this->transformNode->set_global_transform(this->get_global_transform());
+        this->transformNode->add_child(this->viewport);
+        this->reparent(this->viewport);
+        doneonce = true;
+    }
+    this->set_global_transform(this->transformNode->get_global_transform());
     this->send_frame();
 }
 
 void GStreamerCamera::_ready()
 {
-    //this->imageFormat = this->viewport->get_texture().ptr()->get_image().ptr()->get_format();
+    this->imageFormat = this->viewport->get_texture().ptr()->get_image().ptr()->get_format();
+    this->clear_current();
     this->initializeGStreamer();
 }
 
 void GStreamerCamera::initializeGStreamer()
 {
-
 
     if (this->is_streaming)
     {
@@ -187,11 +178,11 @@ void GStreamerCamera::initializeGStreamer()
 
 void GStreamerCamera::send_frame()
 {
-    
+
     PackedByteArray pixel_data;
-  
-   
-    if(this->viewport->get_texture().ptr()->get_image().ptr()->get_format() != Image::Format::FORMAT_RGB8){
+
+    if (this->viewport->get_texture().ptr()->get_image().ptr()->get_format() != Image::Format::FORMAT_RGB8)
+    {
         Ref<Image> img = this->viewport->get_texture().ptr()->get_image();
         img->convert(Image::FORMAT_RGB8);
         pixel_data = img->get_data();

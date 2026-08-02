@@ -14,14 +14,13 @@
 
 using namespace godot;
 
-class GStreamerCamera : public Node3D {
-    GDCLASS(GStreamerCamera, Node3D)
+class GStreamerCamera : public Camera3D {
+    GDCLASS(GStreamerCamera, Camera3D)
 
 private:
     
     Vector2i frameSize = Vector2i(256,256);
-    String deviceName = "VirtualCamera"; 
-    String devicePath = "./VirtualCamera";
+    String devicePath = "/tmp/VirtualCamera";
 
     String pipelineString = "";
 
@@ -35,7 +34,7 @@ private:
     Image::Format imageFormat = Image::Format::FORMAT_RGB8;
 
     SubViewport* viewport;
-    Camera3D* camera;
+    Node3D* transformNode;
 
 
     void initializeGStreamer();
@@ -53,8 +52,8 @@ public:
     GStreamerCamera();
     ~GStreamerCamera();
 
-    void set_device_name(const String name);
-    String get_device_name() const;
+    void set_device_path(const String path);
+    String get_device_path() const;
 
     void set_frame_size(const Vector2i size);
     Vector2i get_frame_size() const;
@@ -62,13 +61,6 @@ public:
     void set_pipeline_string(const String pipelineString);
     String get_pipeline_string() const;
 
-    void set_fov(const float fov);
-    float get_fov() const;
-
-    // bool _set(const StringName &p_name, const Variant &p_value);
-    // bool _get(const StringName &p_name, Variant &r_ret) const;
-    // void _get_property_list(List<PropertyInfo> *p_list) const;
-    
     void _process(double delta) override;
     void _ready() override;
 
