@@ -85,22 +85,28 @@ GStreamerCamera::~GStreamerCamera()
 bool doneonce = false;
 void GStreamerCamera::_process(double delta)
 {
-    if (!doneonce)
-    {
+
+
+    if(!this->transformNode->is_inside_tree())
         this->add_sibling(this->transformNode);
+    if(!this->viewport->is_inside_tree())
+        this->add_sibling(this->viewport);
+    if (!doneonce && this->transformNode->is_inside_tree() && this->viewport->is_inside_tree())
+    {
         this->transformNode->set_global_transform(this->get_global_transform());
-        this->transformNode->add_child(this->viewport);
         this->reparent(this->viewport);
+        this->set_current(true);
         doneonce = true;
     }
-    this->set_global_transform(this->transformNode->get_global_transform());
+    if(doneonce)
+        this->set_global_transform(this->transformNode->get_global_transform());
     this->send_frame();
 }
 
 void GStreamerCamera::_ready()
 {
     this->imageFormat = this->viewport->get_texture().ptr()->get_image().ptr()->get_format();
-    this->clear_current();
+    this->set_current(false);
     this->initializeGStreamer();
 }
 
