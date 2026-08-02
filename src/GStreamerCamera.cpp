@@ -26,10 +26,24 @@ void GStreamerCamera::_bind_methods()
     ClassDB::bind_method(D_METHOD("set_frame_size", "size"), &GStreamerCamera::set_frame_size);
     ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "frameSize", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT), "set_frame_size", "get_frame_size");
 
+    ClassDB::bind_method(D_METHOD("get_fov"), &GStreamerCamera::get_fov);
+    ClassDB::bind_method(D_METHOD("set_fov", "fov"), &GStreamerCamera::set_fov);
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "FOV", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT), "set_fov", "get_fov");
+
     ClassDB::bind_method(D_METHOD("get_pipeline_string"), &GStreamerCamera::get_pipeline_string);
     ClassDB::bind_method(D_METHOD("set_pipeline_string", "pipelineString"), &GStreamerCamera::set_pipeline_string);
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "GStreamer Pipeline String", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT), "set_pipeline_string", "get_pipeline_string");
 
+
+}
+
+void GStreamerCamera::set_fov(const float fov)
+{
+    this->camera->set_fov(fov);
+}
+float GStreamerCamera::get_fov() const
+{
+    return this->camera->get_fov();
 }
 
 void GStreamerCamera::set_pipeline_string(const String pipelineString)
@@ -65,7 +79,7 @@ GStreamerCamera::GStreamerCamera()
 {
 
     this->camera = memnew(Camera3D);
-    this->camera->set_fov(90);
+    //this->camera->set_fov(90);
 
     this->viewport = memnew(SubViewport);
     this->viewport->add_child(this->camera);
