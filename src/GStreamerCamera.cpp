@@ -32,7 +32,6 @@ void GStreamerCamera::_bind_methods()
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "GStreamer Pipeline String", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT), "set_pipeline_string", "get_pipeline_string");
 }
 
-
 void GStreamerCamera::set_pipeline_string(const String pipelineString)
 {
     this->pipelineString = pipelineString;
@@ -41,7 +40,6 @@ String GStreamerCamera::get_pipeline_string() const
 {
     return this->pipelineString;
 }
-
 
 void GStreamerCamera::set_device_path(const String devicePath)
 {
@@ -64,13 +62,12 @@ Vector2i GStreamerCamera::get_frame_size() const
 
 GStreamerCamera::GStreamerCamera()
 {
-
-    this-> transformNode = memnew(Node3D);
-    this->transformNode->set_name("GStreamerCameraTransformNode");
+    this->transformNode = memnew(Node3D);
+    //this->transformNode->set_name(this->get_name() + String("TransformNode"));
 
     this->viewport = memnew(SubViewport);
     this->viewport->set_size(this->frameSize);
-    this->viewport->set_name("GStreamerCameraViewport");
+    //this->viewport->set_name(this->get_name() + String("Viewport"));
     this->viewport->set_update_mode(SubViewport::UPDATE_ALWAYS);
     this->viewport->set_clear_mode(SubViewport::CLEAR_MODE_ALWAYS);
 
@@ -82,29 +79,32 @@ GStreamerCamera::~GStreamerCamera()
     stop_stream();
 }
 
-bool doneonce = false;
+
 void GStreamerCamera::_process(double delta)
 {
 
-
-    if(!this->transformNode->is_inside_tree())
+    if (!this->transformNode->is_inside_tree())
         this->add_sibling(this->transformNode);
-    if(!this->viewport->is_inside_tree())
+    if (!this->viewport->is_inside_tree())
         this->add_sibling(this->viewport);
-    if (!doneonce && this->transformNode->is_inside_tree() && this->viewport->is_inside_tree())
+    if (!this->doneonce && this->transformNode->is_inside_tree() && this->viewport->is_inside_tree())
     {
         this->transformNode->set_global_transform(this->get_global_transform());
         this->reparent(this->viewport);
+        this->viewport->reparent(this->transformNode);
         this->set_current(true);
-        doneonce = true;
+        this->doneonce = true;
     }
-    if(doneonce)
+    if (this->doneonce)
         this->set_global_transform(this->transformNode->get_global_transform());
     this->send_frame();
+    UtilityFunctions::print(vformat("Cam : %s , id : %s", this->get_name(), this->transformNode->get_name()));
 }
 
 void GStreamerCamera::_ready()
 {
+
+
     this->imageFormat = this->viewport->get_texture().ptr()->get_image().ptr()->get_format();
     this->set_current(false);
     this->initializeGStreamer();

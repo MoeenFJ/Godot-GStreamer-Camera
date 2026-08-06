@@ -35,6 +35,8 @@ private:
 
     SubViewport* viewport;
     Node3D* transformNode;
+    
+    bool doneonce = false;
 
 
     void initializeGStreamer();
